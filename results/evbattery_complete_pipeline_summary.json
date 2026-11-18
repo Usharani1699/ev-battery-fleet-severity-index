@@ -1,0 +1,14 @@
+{
+  "canonical_rows": 191,
+  "cohort_rows": 100,
+  "overlap_rows": 100,
+  "duplicate_policy": "all-vehicles is canonical; cohort file is sensitivity-only",
+  "fsi_soh_spearman_rho": 0.21664107688935064,
+  "fsi_soh_p_value": 0.0026106094955864957,
+  "cross_dataset_validation": {
+    "mae_pct_points": 3.827385342589647,
+    "rmse_pct_points": 4.823018644215803,
+    "r2": -0.172152780446736
+  },
+  "warning": "Associations are observational; dataset normalization can confound transfer."
+}

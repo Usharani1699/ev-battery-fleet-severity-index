@@ -1,0 +1,91 @@
+VERIFIED RUN LOG - generated Tue Sep  1 21:43:20 GMTDT 2026
+Machine: user's Windows 11, Python 3.11.9, pandas 2.3.3, scikit-learn 1.9.0, xgboost 3.2.0, shap 0.51.0
+
+==================== 1. evbattery_fsi_complete_pipeline.py ====================
+Complete EVBattery pipeline finished: 191 canonical vehicles
+Results saved in: <repo>\EVBattery_updated_results
+
+==================== 2. cross_dataset_validation_CORRECTED.py ====================
+==============================================================================
+CORRECTED cross-dataset / cross-chemistry validation
+==============================================================================
+
+Rows in 'Lab' by Dataset (sanity check):
+Dataset
+CALCE_CS2    5743
+NASA         2769
+Oxford        519
+
+LCO training pool (NASA+CALCE): 8,512 cycles
+Oxford (NMC) held-out pool     : 519 cycles (NEVER included in training/imputer fitting)
+
+NOTE: CALCE_CS2 subset has 2 unique physical cell(s) (['CS2_24', 'CS2_33']) -> using GroupKFold(n_splits=2)
+
+=== CALCE only, battery-GROUPED 2-fold CV (GroupKFold by cell ID, 2 cells) ===
+  n_cycles=5743  n_cells=2
+  RMSE=11.422  MAE=10.222  R2=0.7678
+
+=== Oxford NMC — TRUE held-out cross-chemistry transfer (model trained ONLY on NASA+CALCE, Oxford never seen) ===
+  n_cycles=519  n_cells=8
+  RMSE=32.702  MAE=32.021  R2=-23.034
+
+Saved: <repo>\_results\cross_dataset_validation_CORRECTED.json
+
+==================== 3. evbattery_ml_analysis_RERUN.py ====================
+Loaded 100 vehicles
+
+=== XGBoost 5-Fold CV Results ===
+  R²  : -0.1181 ± 0.2766
+  MAE : 3.6550 ± 0.4350 %SoH
+
+  Full-data R² : 0.9920
+  Full-data MAE: 0.3063 %SoH
+
+Computing SHAP values...
+
+=== SHAP Feature Importance ===
+  Snippet count                 : 21.3%
+  Mileage (km)                  : 18.7%
+  KI (current variability)      : 18.1%
+  T_avg (°C)                    : 15.1%
+  C-rate                        : 14.9%
+  FSI (composite)               : 11.8%
+
+=== Pearson Correlations with SoH ===
+  Mileage (km)                  : r = -0.2325
+  KI (current variability)      : r = -0.1189
+  T_avg (°C)                    : r = +0.2106
+  C-rate                        : r = -0.0062
+  Snippet count                 : r = +0.1788
+  FSI (composite)               : r = +0.0608
+
+Saved: <repo>\_results/Fig_EVBattery_Overview.png
+Saved: <repo>\_results/Fig_SHAP_Beeswarm.png
+Saved: <repo>\_results/Fig_Predicted_vs_Actual.png
+
+============================================================
+DISSERTATION SUMMARY TABLE
+============================================================
+Dataset: EVBattery (real Chinese EV fleet)
+Vehicles: 100 (capacity-labeled, dataset1)
+SoH range: 75.8% – 99.9%
+Mileage range: 42k – 268k km
+
+Health classification:
+              Vehicles
+health_label          
+Degraded            76
+Healthy             22
+EOL                  2
+
+XGBoost SoH regression (5-fold CV):
+  R²  = -0.118 ± 0.277
+  MAE = 3.655 ± 0.435 %SoH
+
+FSI correlation with real SoH:
+  r = 0.0608 (charging duty-cycle FSI)
+  Reason: DoD from 128-step charging snippets ≈ 0
+
+Key finding: Mileage (r=−0.23) and Temperature (r=+0.21)
+are stronger SoH predictors from charging data than FSI (r=0.06)
+→ FSI designed for driving data; charging data needs different weighting
